@@ -1,0 +1,4 @@
+import type { Metadata } from 'next'
+import { LegalPage } from '@/components/legal-page'
+export const metadata:Metadata={title:'Política de privacidad | ZELTRON Express',description:'Política de tratamiento de datos de ZELTRON Express.'}
+export default function Page(){return <LegalPage eyebrow="Legal" title="Política de privacidad" sections={[["Tratamiento de datos","ZELTRON S.A.S. trata tus datos personales de acuerdo con la Ley 1581 de 2012 y sus normas complementarias."],["Finalidades","Usamos tus datos para procesar pedidos, coordinar entregas, brindar soporte, responder solicitudes y comunicar información relacionada con tus compras."],["Derechos y contacto","Puedes conocer, actualizar, rectificar o solicitar la supresión de tus datos, así como presentar consultas o reclamos. Escríbenos por WhatsApp al +57 302 593 1994 o a través de la página de contacto."]]}/>}

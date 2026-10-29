@@ -1,0 +1,4 @@
+import type { Metadata } from 'next'
+import { LegalPage } from '@/components/legal-page'
+export const metadata:Metadata={title:'Garantías y devoluciones | ZELTRON Express',description:'Garantías, retracto y devoluciones de ZELTRON Express.'}
+export default function Page(){return <LegalPage eyebrow="Protección" title="Garantías y devoluciones" sections={[["Garantía legal","Nuestros productos cuentan con la garantía legal prevista en la Ley 1480 de 2011, aplicable a defectos de calidad, idoneidad o seguridad."],["Derecho de retracto","Puedes ejercer el derecho de retracto dentro de los 5 días hábiles siguientes a la entrega, siempre que se cumplan las condiciones legales y el producto sea devuelto en el estado correspondiente."],["Proceso por WhatsApp","1. Escríbenos al +57 302 593 1994 con tu número de pedido.\n2. Indica el motivo y envía fotos o videos cuando aplique.\n3. Revisaremos la solicitud y te informaremos los pasos de devolución o solución."]]}/>}
