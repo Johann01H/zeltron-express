@@ -1,7 +1,7 @@
-import { cookies } from 'next/headers'
-import { SESSION_COOKIE } from '@/lib/auth'
+import { signOut } from '@/lib/account-actions'
 
+/** Cierra la sesión (borra la cookie y anula el token en WordPress) y vuelve al inicio. */
 export async function POST(request: Request) {
-  ;(await cookies()).delete(SESSION_COOKIE)
+  await signOut()
   return Response.redirect(new URL('/', request.url), 303)
 }

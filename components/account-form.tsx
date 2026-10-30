@@ -1,15 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useTransition, type FormEvent } from 'react'
-import { ArrowLeft, ArrowRight, Check, CreditCard, Eye, EyeOff, LockKeyhole, MessageCircle, Truck } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useState, useTransition, type FormEvent } from 'react'
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, CreditCard, Eye, EyeOff, KeyRound, LockKeyhole, MailCheck, MessageCircle, Truck } from 'lucide-react'
 import { whatsappLink, COMPANY_NAME } from '@/lib/config'
 import { formatCOP } from '@/lib/format'
 import type { Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { signIn, signUp } from '@/lib/account-actions'
+import { requestPasswordReset, resetPassword, signIn, signUp, type AccountActionResult } from '@/lib/account-actions'
 
-type AccountFormMode = 'sign-in' | 'sign-up'
+export type AccountFormMode = 'sign-in' | 'sign-up' | 'forgot' | 'reset'
 
 const benefits = [
   { Icon: CreditCard, title: 'Pago contra entrega', text: 'Pagas cuando recibes' },
@@ -19,10 +20,11 @@ const benefits = [
 
 export function AccountForm({ mode, showcase }: { mode: AccountFormMode; showcase: Product[] }) {
   const isSignUp = mode === 'sign-up'
+  const isRecovery = mode === 'forgot' || mode === 'reset'
 
   return (
     <div className="grid min-h-dvh bg-[#F3F5FA] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
-      <BrandPanel isSignUp={isSignUp} showcase={showcase} />
+      <BrandPanel mode={mode} showcase={showcase} />
       <main className="flex flex-col px-5 py-6 sm:px-10 lg:px-14 lg:py-8">
         <div className="flex items-center justify-between gap-4">
           <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-[#5B6478] transition hover:text-[#0E1A3A]">
@@ -35,8 +37,21 @@ export function AccountForm({ mode, showcase }: { mode: AccountFormMode; showcas
         </div>
 
         <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center py-10">
-          <ModeSwitch isSignUp={isSignUp} />
-          <AuthForm key={mode} isSignUp={isSignUp} />
+          {isRecovery ? (
+            <Link href="/iniciar-sesion" className="inline-flex items-center gap-1.5 self-start text-sm font-semibold text-[#2F5BFF] hover:underline">
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              Volver a iniciar sesión
+            </Link>
+          ) : (
+            <ModeSwitch isSignUp={isSignUp} />
+          )}
+          {mode === 'forgot' && <ForgotForm />}
+          {mode === 'reset' && (
+            <Suspense fallback={<div className="mt-9 h-80 animate-pulse rounded-2xl bg-[#E6EAF2]" aria-busy="true" />}>
+              <ResetForm />
+            </Suspense>
+          )}
+          {!isRecovery && <AuthForm key={mode} isSignUp={isSignUp} />}
         </div>
 
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#8A8C95]">
@@ -49,8 +64,16 @@ export function AccountForm({ mode, showcase }: { mode: AccountFormMode; showcas
   )
 }
 
-function BrandPanel({ isSignUp, showcase }: { isSignUp: boolean; showcase: Product[] }) {
+const brandCopy: Record<AccountFormMode, { kicker: string; text: string }> = {
+  'sign-in': { kicker: 'Qué bueno verte de nuevo', text: 'Entra para revisar tus pedidos, tus direcciones y tus productos favoritos.' },
+  'sign-up': { kicker: 'Únete a ZELTRON', text: 'Crea tu cuenta para seguir tus pedidos y guardar tus direcciones de entrega.' },
+  forgot: { kicker: 'Recupera tu acceso', text: 'Te enviamos un enlace a tu correo para que crees una contraseña nueva en un minuto.' },
+  reset: { kicker: 'Casi listo', text: 'Elige una contraseña nueva y vuelve a comprar con tu cuenta.' },
+}
+
+function BrandPanel({ mode, showcase }: { mode: AccountFormMode; showcase: Product[] }) {
   const [main, ...rest] = showcase
+  const copy = brandCopy[mode]
   return (
     <aside className="relative isolate overflow-hidden bg-[#0E1A3A] px-5 py-6 text-white sm:px-10 lg:flex lg:min-h-dvh lg:flex-col lg:justify-between lg:p-12 xl:p-14">
       {/* Fondo: brillo cálido, retícula de puntos y órbitas */}
@@ -66,15 +89,13 @@ function BrandPanel({ isSignUp, showcase }: { isSignUp: boolean; showcase: Produ
 
       <div className="hidden lg:block">
         <p className="text-[11px] font-bold uppercase tracking-[.22em] text-[#FFC92E]">
-          {isSignUp ? 'Únete a ZELTRON' : 'Qué bueno verte de nuevo'}
+          {copy.kicker}
         </p>
         <h2 className="mt-4 max-w-md text-5xl font-extrabold leading-[.98] tracking-[-.06em] text-white xl:text-6xl">
           Tecnología que llega <span className="text-[#FFC92E]">a tu puerta.</span>
         </h2>
         <p className="mt-5 max-w-sm text-sm leading-7 text-white/70">
-          {isSignUp
-            ? 'Crea tu cuenta para seguir tus pedidos y guardar tus direcciones de entrega.'
-            : 'Entra para revisar tus pedidos, tus direcciones y tus productos favoritos.'}
+          {copy.text}
         </p>
 
         {main && (
@@ -143,19 +164,40 @@ function passwordScore(value: string) {
   return [value.length >= 8, /[A-Z]/.test(value) && /[a-z]/.test(value), /\d/.test(value), /[^A-Za-z0-9]/.test(value)].filter(Boolean).length
 }
 
+function Notice({ result }: { result: AccountActionResult | null }) {
+  if (!result) return null
+  return (
+    <p
+      role={result.ok ? 'status' : 'alert'}
+      className={cn(
+        'rounded-xl border px-4 py-3 text-xs leading-5',
+        result.ok ? 'border-[#B7E4C7] bg-[#EEFBF3] text-[#14532D]' : 'border-[#F5C2BD] bg-[#FFF1F0] text-[#912018]',
+      )}
+    >
+      {result.message}
+    </p>
+  )
+}
+
 function AuthForm({ isSignUp }: { isSignUp: boolean }) {
+  const router = useRouter()
   const [visible, setVisible] = useState(false)
   const [password, setPassword] = useState('')
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState<AccountActionResult | null>(null)
   const [pending, startTransition] = useTransition()
   const score = passwordScore(password)
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
+    setNotice(null)
     startTransition(async () => {
       const result = await (isSignUp ? signUp(formData) : signIn(formData))
-      setNotice(result.message)
+      setNotice(result)
+      if (result.ok) {
+        router.replace(result.redirectTo ?? '/perfil')
+        router.refresh()
+      }
     })
   }
 
@@ -169,6 +211,7 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        <input type="hidden" name="redirectTo" value="/perfil" />
         {isSignUp && (
           <div className="grid gap-4 sm:grid-cols-2">
             <TextField id="name" name="name" label="Nombre completo" autoComplete="name" placeholder="María Fernanda" required />
@@ -181,9 +224,9 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="text-xs font-semibold text-[#353946]">Contraseña</label>
             {!isSignUp && (
-              <button type="button" className="text-xs font-semibold text-[#2F5BFF] hover:underline" onClick={() => setNotice('Para recuperar tu acceso escríbenos por WhatsApp mientras habilitamos esta opción.')}>
+              <Link href="/recuperar-contrasena" className="text-xs font-semibold text-[#2F5BFF] hover:underline">
                 ¿La olvidaste?
-              </button>
+              </Link>
             )}
           </div>
           <div className="relative">
@@ -249,9 +292,7 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
           <ArrowRight aria-hidden="true" className="size-4 text-[#FFC92E] transition group-hover:translate-x-0.5" />
         </button>
 
-        {notice && (
-          <p role="status" className="rounded-xl border border-[#F3DE9A] bg-[#FFF9E6] px-4 py-3 text-xs leading-5 text-[#6B4E00]">{notice}</p>
-        )}
+        <Notice result={notice} />
       </form>
 
       <div className="my-7 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[.14em] text-[#9A9CA5]">
@@ -265,6 +306,152 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
         <LockKeyhole aria-hidden="true" className="size-3" />
         Tus datos se usan solo para gestionar tus pedidos.
       </p>
+    </div>
+  )
+}
+
+function SubmitButton({ pending, label, pendingLabel = 'Un momento…' }: { pending: boolean; label: string; pendingLabel?: string }) {
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="group mt-2 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#0E1A3A] text-sm font-bold text-white shadow-[0_10px_30px_rgba(14,26,58,.25)] transition hover:bg-[#172B55] disabled:opacity-70"
+    >
+      {pending ? pendingLabel : label}
+      <ArrowRight aria-hidden="true" className="size-4 text-[#FFC92E] transition group-hover:translate-x-0.5" />
+    </button>
+  )
+}
+
+function ForgotForm() {
+  const [result, setResult] = useState<AccountActionResult | null>(null)
+  const [pending, startTransition] = useTransition()
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    setResult(null)
+    startTransition(async () => setResult(await requestPasswordReset(formData)))
+  }
+
+  if (result?.ok) {
+    return (
+      <div className="mt-9 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <span className="grid size-12 place-items-center rounded-2xl bg-[#EAF0FF] text-[#2F5BFF]"><MailCheck aria-hidden="true" className="size-6" /></span>
+        <h1 className="mt-5 text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A]">Revisa tu correo</h1>
+        <p className="mt-3 text-sm leading-6 text-[#656A76]" role="status">{result.message}</p>
+        <p className="mt-3 text-sm leading-6 text-[#656A76]">El enlace funciona durante 24 horas.</p>
+        <button type="button" onClick={() => setResult(null)} className="mt-6 text-sm font-semibold text-[#2F5BFF] hover:underline">
+          Usar otro correo
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <h1 className="mt-9 text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A] sm:text-4xl">¿Olvidaste tu contraseña?</h1>
+      <p className="mt-2 text-sm leading-6 text-[#656A76]">Escribe el correo de tu cuenta y te enviamos un enlace para crear una nueva.</p>
+      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        <TextField id="email" name="email" label="Correo electrónico" type="email" autoComplete="email" placeholder="nombre@correo.com" required autoFocus />
+        <SubmitButton pending={pending} label="Enviar enlace" pendingLabel="Enviando…" />
+        <Notice result={result} />
+      </form>
+    </div>
+  )
+}
+
+function ResetForm() {
+  const params = useSearchParams()
+  const login = params.get('login') ?? ''
+  const key = params.get('key') ?? ''
+  const [visible, setVisible] = useState(false)
+  const [password, setPassword] = useState('')
+  const [result, setResult] = useState<AccountActionResult | null>(null)
+  const [pending, startTransition] = useTransition()
+  const score = passwordScore(password)
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formData = new FormData(event.currentTarget)
+    setResult(null)
+    startTransition(async () => setResult(await resetPassword(formData)))
+  }
+
+  if (!login || !key) {
+    return (
+      <div className="mt-9">
+        <h1 className="text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A]">Enlace incompleto</h1>
+        <p className="mt-3 text-sm leading-6 text-[#656A76]">Abre el enlace completo que te enviamos por correo o solicita uno nuevo.</p>
+        <Link href="/recuperar-contrasena" className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-[#0E1A3A] px-6 text-sm font-bold text-white">Solicitar enlace nuevo</Link>
+      </div>
+    )
+  }
+
+  if (result?.ok) {
+    return (
+      <div className="mt-9 animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <span className="grid size-12 place-items-center rounded-2xl bg-[#EEFBF3] text-[#167A53]"><CheckCircle2 aria-hidden="true" className="size-6" /></span>
+        <h1 className="mt-5 text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A]">Contraseña actualizada</h1>
+        <p className="mt-3 text-sm leading-6 text-[#656A76]" role="status">{result.message}</p>
+        <Link href="/iniciar-sesion" className="group mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0E1A3A] text-sm font-bold text-white transition hover:bg-[#172B55]">
+          Iniciar sesión <ArrowRight aria-hidden="true" className="size-4 text-[#FFC92E]" />
+        </Link>
+      </div>
+    )
+  }
+
+  return (
+    <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <span className="mt-9 grid size-12 place-items-center rounded-2xl bg-[#EAF0FF] text-[#2F5BFF]"><KeyRound aria-hidden="true" className="size-6" /></span>
+      <h1 className="mt-5 text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A] sm:text-4xl">Crea una contraseña nueva</h1>
+      <p className="mt-2 text-sm leading-6 text-[#656A76]">Usa al menos 8 caracteres. Al guardarla se cerrarán tus sesiones abiertas.</p>
+      <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        <input type="hidden" name="login" value={login} />
+        <input type="hidden" name="key" value={key} />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="new-password" className="text-xs font-semibold text-[#353946]">Nueva contraseña</label>
+          <div className="relative">
+            <input
+              id="new-password"
+              name="password"
+              type={visible ? 'text' : 'password'}
+              autoComplete="new-password"
+              placeholder="Mínimo 8 caracteres"
+              minLength={8}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={cn(inputClass, 'pr-12')}
+            />
+            <button
+              type="button"
+              aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              aria-pressed={visible}
+              onClick={() => setVisible((v) => !v)}
+              className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-[#737681] transition hover:bg-[#F4F6FB] hover:text-[#0E1A3A]"
+            >
+              {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+          {password && (
+            <div className="mt-1 flex items-center gap-2" aria-live="polite">
+              <div className="flex flex-1 gap-1">
+                {[0, 1, 2, 3].map((i) => (
+                  <span key={i} className={cn('h-1 flex-1 rounded-full transition', i < score ? (score <= 1 ? 'bg-[#B42318]' : score === 2 ? 'bg-[#FFC92E]' : 'bg-[#167A53]') : 'bg-[#DCE1EC]')} />
+                ))}
+              </div>
+              <span className="text-[11px] text-[#6B6E78]">{['Muy débil', 'Débil', 'Aceptable', 'Buena', 'Excelente'][score]}</span>
+            </div>
+          )}
+        </div>
+        <TextField id="confirm-new-password" name="confirmPassword" label="Confirmar contraseña" type="password" autoComplete="new-password" placeholder="Repite tu contraseña" minLength={8} required />
+        <SubmitButton pending={pending} label="Guardar contraseña" pendingLabel="Guardando…" />
+        <Notice result={result} />
+        {result && !result.ok && /enlace/i.test(result.message) && (
+          <Link href="/recuperar-contrasena" className="text-center text-sm font-semibold text-[#2F5BFF] hover:underline">Solicitar un enlace nuevo</Link>
+        )}
+      </form>
     </div>
   )
 }

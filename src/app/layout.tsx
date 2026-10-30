@@ -3,7 +3,7 @@ import { Archivo, Manrope } from "next/font/google";
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Suspense } from "react";
-import { SiteHeader } from "@/components/site-header";
+import { SiteHeader, SiteHeaderShell } from "@/components/site-header";
 import { SiteChrome } from "@/components/site-chrome";
 import { RouteProgress } from "@/components/route-progress";
 import { Footer } from "@/components/site-sections";
@@ -65,7 +65,7 @@ export default function RootLayout({
           <RouteProgress />
         </Suspense>
         {/* El header y el footer se ocultan en las pantallas de cuenta (ver STANDALONE_ROUTES). */}
-        <Suspense fallback={<SiteHeader />}>
+        <Suspense fallback={<SiteHeaderShell />}>
           <SiteChrome><SiteHeader /></SiteChrome>
         </Suspense>
         {children}
