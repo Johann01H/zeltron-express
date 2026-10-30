@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, BatteryCharging, CreditCard, Gamepad2, Headphones, Home, MessageCircle, ShieldCheck, Smartphone, Truck, Watch } from 'lucide-react'
+import { ArrowRight, BatteryCharging, Bike, CreditCard, Gamepad2, Headphones, Home, Laptop, MessageCircle, ShieldCheck, Smartphone, Truck, Tv, Watch } from 'lucide-react'
 import { COMPANY_NAME, FACEBOOK_URL, FREE_SHIPPING_FROM, INSTAGRAM_URL, whatsappLink } from '@/lib/config'
 import { formatCOP } from '@/lib/format'
 import type { Category, Product } from '@/lib/types'
@@ -28,6 +28,12 @@ export function TrustBar() {
 
 const categoryIcons: Record<string, typeof Smartphone> = {
   Audio: Headphones,
+  'Celulares y tablets': Smartphone,
+  Accesorios: BatteryCharging,
+  Computación: Laptop,
+  'TV y consolas': Tv,
+  Hogar: Home,
+  'Movilidad eléctrica': Bike,
   Smartwatches: Watch,
   'Accesorios para celular': Smartphone,
   'Carga y energía': BatteryCharging,

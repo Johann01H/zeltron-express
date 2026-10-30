@@ -186,6 +186,8 @@ final class Settings {
 				</table>
 				<?php submit_button( 'Guardar ajustes' ); ?>
 			</form>
+
+			<?php Image_Linker::render_box(); ?>
 		</div>
 		<?php
 	}

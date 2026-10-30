@@ -2,7 +2,7 @@
 Requires at least: 6.5
 Requires PHP: 8.1
 Requires Plugins: woocommerce, wp-graphql
-Stable tag: 1.0.0
+Stable tag: 1.0.2
 
 Núcleo headless de ZELTRON Express (admin.zeltronexpress.com).
 
@@ -40,3 +40,8 @@ Opcional (más seguro): define el secreto en wp-config.php
 * Características: pestaña Atributos, marcando "Visible en la página del producto".
 * Variantes (color, capacidad): producto variable.
 * Proveedor y costo: pestaña General, bloque "Zeltron · Proveedor y margen".
+
+== Changelog ==
+
+= 1.0.2 =
+* Nuevo: WooCommerce → Zeltron → «Asignar imágenes por referencia» enlaza cada producto con la imagen de Medios que se llama como su SKU.

@@ -224,7 +224,8 @@ final class Catalog {
 	private static function specs( \WC_Product $product ): array {
 		$specs = array();
 		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute instanceof \WC_Product_Attribute || $attribute->get_variation() || ! $attribute->get_visible() ) {
+			// La marca ya viaja en su propio campo; no se repite como característica.
+			if ( ! $attribute instanceof \WC_Product_Attribute || $attribute->get_variation() || ! $attribute->get_visible() || 'pa_marca' === $attribute->get_name() ) {
 				continue;
 			}
 			$label  = wc_attribute_label( $attribute->get_name(), $product );

@@ -21,6 +21,7 @@ final class Plugin {
 		Revalidation::init();
 		Security::init();
 		GraphQL::init();
+		Image_Linker::init();
 	}
 
 	public static function missing_dependencies_notice(): void {

@@ -8,6 +8,7 @@ import { SiteChrome } from "@/components/site-chrome";
 import { RouteProgress } from "@/components/route-progress";
 import { Footer } from "@/components/site-sections";
 import { SITE_URL, STORE_NAME } from "@/lib/config";
+import { getSiteIconUrl } from "@/lib/site-icon";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -21,16 +22,27 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: { default: "Inicio | ZELTRON Express", template: "%s" },
-  description:
-    "Compra tecnología, accesorios y gadgets con envío a toda Colombia y pago contra entrega.",
-  openGraph: {
-    title: "ZELTRON Express",
-    description: "Tecnología útil que llega a tu puerta.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  // El favicon es el «Icono del sitio» de WordPress; se cambia desde el panel sin tocar código.
+  const siteIcon = await getSiteIconUrl();
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: { default: "Inicio | ZELTRON Express", template: "%s" },
+    description:
+      "Compra tecnología, accesorios y gadgets con envío a toda Colombia y pago contra entrega.",
+    openGraph: {
+      title: "ZELTRON Express",
+      description: "Tecnología útil que llega a tu puerta.",
+    },
+    ...(siteIcon && {
+      icons: {
+        icon: siteIcon,
+        shortcut: siteIcon,
+        apple: siteIcon,
+      },
+    }),
+  };
+}
 export const viewport: Viewport = {
   colorScheme: "light",
   themeColor: "#0E1A3A",
