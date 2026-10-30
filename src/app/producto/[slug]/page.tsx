@@ -11,8 +11,13 @@ import { ProductActions } from './product-actions'
 import { ProductGallery } from '@/components/product-gallery'
 import { DeliveryEstimate } from '@/components/delivery-estimate'
 
+// Con Cache Components debe devolver al menos una ruta. Si el catálogo está vacío
+// usamos una ruta de reserva que responde 404; los productos nuevos se generan al primer visitante.
+const EMPTY_CATALOG_SLUG = 'catalogo-vacio'
+
 export async function generateStaticParams() {
-  return (await getProducts()).map((p) => ({ slug: p.slug }))
+  const slugs = (await getProducts()).map((p) => ({ slug: p.slug }))
+  return slugs.length > 0 ? slugs : [{ slug: EMPTY_CATALOG_SLUG }]
 }
 
 export async function generateMetadata({ params }: PageProps<'/producto/[slug]'>): Promise<Metadata> {
