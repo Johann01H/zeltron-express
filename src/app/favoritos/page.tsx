@@ -29,7 +29,7 @@ export default async function FavoritesPage() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#2F5BFF]">Tu lista personal</p>
               <h1 className="mt-1 text-3xl font-extrabold tracking-[-.06em] text-[#0E1A3A] sm:text-4xl">Tus favoritos</h1>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-[#656A76]">Se guardan en este navegador para que vuelvas a ellos cuando quieras.</p>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#656A76]">Toca el corazón de cualquier producto para guardarlo. Si inicias sesión, tus favoritos quedan en tu cuenta y los ves desde cualquier dispositivo.</p>
             </div>
           </div>
           <Link href="/productos" className="btn-secondary shrink-0">

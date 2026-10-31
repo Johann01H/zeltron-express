@@ -61,6 +61,8 @@ export type Customer = {
   orderCount: number
   totalSpent: number
   addresses: CustomerAddress[]
+  /** IDs de productos guardados en la cuenta. */
+  favorites: string[]
   orders: CustomerOrderSummary[]
 }
 
@@ -81,6 +83,7 @@ export const CUSTOMER_FIELDS = /* GraphQL */ `
   orderCount
   totalSpent
   addresses { id label recipient phone department city neighborhood street notes isPrimary }
+  favorites
   orders {
     number date itemCount total shipping status step address city carrier trackingNumber
     items { name variant quantity total image slug }

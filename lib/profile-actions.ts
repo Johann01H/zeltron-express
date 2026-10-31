@@ -107,3 +107,21 @@ export async function setAvatar(dataUrl: string) {
 export async function removeAvatar() {
   return mutate('zeltronRemoveAvatar', {}, 'Quitamos tu foto de perfil.')
 }
+
+/** Guarda la lista de favoritos en la cuenta. Devuelve la lista que quedó (solo productos publicados). */
+export async function saveFavorites(ids: string[]): Promise<{ ok: boolean; favorites?: string[] }> {
+  const token = await getSessionToken()
+  if (!token || !Array.isArray(ids)) return { ok: false }
+  const clean = [...new Set(ids.map(String).filter((id) => /^\d{1,12}$/.test(id)))].slice(0, 200)
+  try {
+    const data = await wpQuery<{ zeltronSetFavorites: { favorites: string[] } }>(
+      `mutation Favorites($input: ZeltronSetFavoritesInput!) { zeltronSetFavorites(input: $input) { favorites } }`,
+      { input: { token, ids: clean } },
+      { authenticated: true },
+    )
+    return { ok: true, favorites: data.zeltronSetFavorites.favorites }
+  } catch (error) {
+    console.error('[favoritos]', error)
+    return { ok: false }
+  }
+}

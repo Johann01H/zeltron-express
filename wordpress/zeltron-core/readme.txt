@@ -2,7 +2,7 @@
 Requires at least: 6.5
 Requires PHP: 8.1
 Requires Plugins: woocommerce, wp-graphql
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 
 Núcleo headless de ZELTRON Express (admin.zeltronexpress.com).
 
@@ -42,6 +42,9 @@ Opcional (más seguro): define el secreto en wp-config.php
 * Proveedor y costo: pestaña General, bloque "Zeltron · Proveedor y margen".
 
 == Changelog ==
+
+= 1.3.0 =
+* Nuevo: los favoritos del cliente se guardan en su cuenta (zeltronSetFavorites) y se ven en cualquier dispositivo.
 
 = 1.2.0 =
 * Nuevo: «Mi cuenta» completa: foto de perfil, datos personales, cambio de contraseña, varias direcciones con una principal y pedidos con sus productos.

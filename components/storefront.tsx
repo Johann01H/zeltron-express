@@ -1,11 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { Heart, Menu, MessageCircle, Minus, Plus, Search, ShoppingCart, X } from 'lucide-react'
+import { Heart, Menu, MessageCircle, Minus, Plus, ShoppingCart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { CategoryNavigation } from '@/components/category-navigation'
 import { AccountMenu, type HeaderAccount } from '@/components/account-menu'
 import { FavoriteButton } from '@/components/favorite-button'
+import { HeaderSearch } from '@/components/header-search'
+import type { SearchItem } from '@/lib/search'
 import { FREE_SHIPPING_FROM, whatsappLink } from '@/lib/config'
 import { discount, formatCOP, isOnSale } from '@/lib/format'
 import type { CartItem, Category, Product } from '@/lib/types'
@@ -28,7 +30,7 @@ function CountBadge({ value }: { value: number }) {
   )
 }
 
-export function Header({ categories, account }: { categories: Category[]; account: HeaderAccount }) {
+export function Header({ categories, account, searchItems }: { categories: Category[]; account: HeaderAccount; searchItems: SearchItem[] }) {
   const hydrated = useHydrated()
   const items = useCart((s) => s.items)
   const favoritesCount = useFavorites((s) => s.ids.length)
@@ -51,10 +53,7 @@ export function Header({ categories, account }: { categories: Category[]; accoun
             {open ? <X /> : <Menu />}
           </Button>
           <Link href="/" className="logo">ZELTRON <span>Express</span></Link>
-          <form action="/productos" method="get" role="search" className="header-search">
-            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6478]" />
-            <input type="search" name="q" aria-label="Buscar productos" placeholder="¿Qué estás buscando?" className="input-light w-full pl-10" />
-          </form>
+          <HeaderSearch items={searchItems} variant="desktop" />
           <Link href="/rastrear" className="hidden text-sm text-white transition hover:text-[#FFC92E] lg:block">Rastrear pedido</Link>
           <a href={whatsappLink()} target="_blank" rel="noreferrer" className="hidden text-sm text-white transition hover:text-[#FFC92E] xl:block">Ayuda</a>
           <AccountMenu account={account} />
@@ -69,12 +68,7 @@ export function Header({ categories, account }: { categories: Category[]; accoun
             {total > 0 && <span className="hidden text-xs lg:inline">{formatCOP(total)}</span>}
           </Link>
         </div>
-        <form action="/productos" method="get" role="search" className="mobile-search">
-          <div className="relative">
-            <Search aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-[#5B6478]" />
-            <input type="search" name="q" aria-label="Buscar productos" placeholder="¿Qué estás buscando?" className="input-light search-input w-full pl-10" />
-          </div>
-        </form>
+        <HeaderSearch items={searchItems} variant="mobile" />
         <CategoryNavigation variant="desktop" categories={categories} />
         {open && (
           <div className="mobile-navigation border-t border-white/10 p-4 lg:hidden">

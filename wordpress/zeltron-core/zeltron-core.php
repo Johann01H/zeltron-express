@@ -3,7 +3,7 @@
  * Plugin Name:       Zeltron Core
  * Plugin URI:        https://zeltronexpress.com
  * Description:       Núcleo headless de ZELTRON Express: API GraphQL para el frontend en Next.js, pedidos contra entrega, datos de proveedor y márgenes, y revalidación automática de la tienda.
- * Version:           1.2.0
+ * Version:           1.3.0
  * Requires at least: 6.5
  * Requires PHP:      8.1
  * Requires Plugins:  woocommerce, wp-graphql
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ZELTRON_CORE_VERSION', '1.2.0' );
+define( 'ZELTRON_CORE_VERSION', '1.3.0' );
 define( 'ZELTRON_CORE_FILE', __FILE__ );
 define( 'ZELTRON_CORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'ZELTRON_CORE_URL', plugin_dir_url( __FILE__ ) );

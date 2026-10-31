@@ -15,6 +15,8 @@ final class Customer_Profile {
 
 	private const ADDRESSES_META = '_zx_addresses';
 	private const AVATAR_META    = '_zx_avatar_id';
+	private const FAVORITES_META = '_zx_favorites';
+	private const MAX_FAVORITES  = 200;
 	private const MAX_ADDRESSES  = 8;
 	private const MAX_AVATAR     = 3 * MB_IN_BYTES;
 	private const AVATAR_TYPES   = array(
@@ -63,6 +65,7 @@ final class Customer_Profile {
 			'orderCount'  => count( $orders ),
 			'totalSpent'  => $spent,
 			'addresses'   => self::addresses( $user_id ),
+			'favorites'   => self::favorites( $user_id ),
 			'orders'      => $orders,
 		);
 	}
@@ -291,6 +294,34 @@ final class Customer_Profile {
 	}
 
 	/* ---------------------------------------------------------------------
+	 * Favoritos
+	 * ------------------------------------------------------------------- */
+
+	/** @return string[] IDs de productos guardados (solo los que siguen publicados). */
+	public static function favorites( int $user_id ): array {
+		$ids = get_user_meta( $user_id, self::FAVORITES_META, true );
+		$ids = is_array( $ids ) ? array_map( 'intval', $ids ) : array();
+		$ids = array_filter( $ids, static fn( $id ) => $id > 0 && 'product' === get_post_type( $id ) && 'publish' === get_post_status( $id ) );
+		return array_values( array_map( 'strval', array_unique( $ids ) ) );
+	}
+
+	/** Reemplaza la lista completa (la tienda ya combina la del navegador con la de la cuenta). */
+	public static function set_favorites( int $user_id, array $ids ): array {
+		$clean = array();
+		foreach ( $ids as $id ) {
+			$id = (int) $id;
+			if ( $id > 0 && ! in_array( $id, $clean, true ) && 'product' === get_post_type( $id ) && 'publish' === get_post_status( $id ) ) {
+				$clean[] = $id;
+			}
+			if ( count( $clean ) >= self::MAX_FAVORITES ) {
+				break;
+			}
+		}
+		update_user_meta( $user_id, self::FAVORITES_META, $clean );
+		return array_map( 'strval', $clean );
+	}
+
+	/* ---------------------------------------------------------------------
 	 * Foto de perfil
 	 * ------------------------------------------------------------------- */
 
@@ -468,6 +499,7 @@ final class Customer_Profile {
 					'orderCount'  => array( 'type' => $int ),
 					'totalSpent'  => array( 'type' => $int ),
 					'addresses'   => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'ZeltronAddress' ) ) ) ),
+					'favorites'   => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'String' ) ) ) ),
 					'orders'      => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'ZeltronCustomerOrder' ) ) ) ),
 				),
 			)
@@ -523,6 +555,19 @@ final class Customer_Profile {
 				'input' => array(),
 				'run'   => static fn( int $uid, array $in ) => self::remove_avatar( $uid ),
 			),
+		);
+
+		// Liviana: se llama cada vez que el cliente toca un corazón, sin recalcular pedidos.
+		register_graphql_mutation(
+			'zeltronSetFavorites',
+			array(
+				'inputFields'         => $token + array( 'ids' => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'String' ) ) ) ) ),
+				'outputFields'        => array( 'favorites' => array( 'type' => array( 'list_of' => 'String' ) ) ),
+				'mutateAndGetPayload' => static function ( array $input ) {
+					$user_id = self::user_from( $input );
+					return array( 'favorites' => self::set_favorites( $user_id, (array) $input['ids'] ) );
+				},
+			)
 		);
 
 		foreach ( $mutations as $name => $def ) {

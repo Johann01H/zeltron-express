@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { Filter, RotateCcw, Search, Truck, X } from 'lucide-react'
 import { ProductCard } from '@/components/storefront'
+import { matchesQuery, searchScore } from '@/lib/search'
 import { discount, formatCOP, isOnSale } from '@/lib/format'
 import type { Category, Product } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -92,14 +93,10 @@ export function ProductCatalog({
   )
 
   const filteredProducts = useMemo(() => {
-    const query = searchQuery.trim().toLocaleLowerCase('es')
+    const query = searchQuery.trim()
     const filtered = products.filter((product) => {
-      const searchableText = [product.name, product.brand ?? '', product.category, product.subcategory, product.description]
-        .join(' ')
-        .toLocaleLowerCase('es')
-
       return (
-        (!query || searchableText.includes(query)) &&
+        matchesQuery(product, query) &&
         (selectedCategory === 'Todos' || product.category === selectedCategory) &&
         (selectedSubcategory === 'Todas' || product.subcategory === selectedSubcategory) &&
         (selectedBrands.length === 0 || (product.brand !== null && selectedBrands.includes(product.brand))) &&
@@ -118,6 +115,8 @@ export function ProductCatalog({
       if (sortBy === 'price-desc') return second.price - first.price
       if (sortBy === 'discount') return discount(second) - discount(first)
       if (sortBy === 'newest') return Number(second.id) - Number(first.id)
+      // Con búsqueda, «Recomendados» ordena por relevancia.
+      if (query) return searchScore(second, query) - searchScore(first, query) || Number(second.stock > 0) - Number(first.stock > 0)
       return Number(second.isBestSeller) - Number(first.isBestSeller) || Number(second.stock > 0) - Number(first.stock > 0)
     })
   }, [

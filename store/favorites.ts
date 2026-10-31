@@ -5,12 +5,14 @@ import { persist } from 'zustand/middleware'
 type FavoritesState = {
   ids: string[]
   toggleFavorite: (productId: string) => void
+  setFavorites: (ids: string[]) => void
 }
 
 export const useFavorites = create<FavoritesState>()(
   persist(
     (set) => ({
       ids: [],
+      setFavorites: (ids) => set({ ids }),
       toggleFavorite: (productId) =>
         set((state) => ({
           ids: state.ids.includes(productId) ? state.ids.filter((id) => id !== productId) : [...state.ids, productId],
