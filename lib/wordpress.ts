@@ -115,3 +115,27 @@ export async function createWordPressOrder(input: CreateOrderInput) {
   )
   return data.zeltronCreateOrder
 }
+
+export type OrderStatus = {
+  orderNumber: string
+  status: string
+  statusLabel: string
+  step: 'recibido' | 'confirmacion' | 'despachado' | 'en-camino' | 'entregado' | 'cancelado'
+  zone: string | null
+  carrier: string | null
+  trackingNumber: string | null
+  total: number
+  createdAt: string | null
+}
+
+/** Estado de un pedido si el celular coincide (últimos 7 dígitos). */
+export async function lookupOrder(number: string, phone: string): Promise<OrderStatus | null> {
+  const data = await wpQuery<{ zeltronOrder: OrderStatus | null }>(
+    `query Order($number: String!, $phone: String!) {
+      zeltronOrder(number: $number, phone: $phone) { orderNumber status statusLabel step zone carrier trackingNumber total createdAt }
+    }`,
+    { number, phone },
+    { authenticated: true },
+  )
+  return data.zeltronOrder
+}

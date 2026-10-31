@@ -24,6 +24,7 @@ final class Plugin {
 		Image_Linker::init();
 		Customer_Accounts::init();
 		Customer_Profile::init();
+		Bot_State::init();
 	}
 
 	public static function missing_dependencies_notice(): void {

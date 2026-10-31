@@ -7,8 +7,9 @@ export const COMPANY_NAME = 'ZELTRON S.A.S.'
 export const STORE_NAME = 'ZELTRON Express'
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zeltronexpress.com'
 
-export const WHATSAPP_NUMBER = '573025931994'
-export const WHATSAPP_DISPLAY = '+57 302 593 1994'
+/** Número al que llevan los botones de WhatsApp de la tienda (el del bot, si lo tienes). Solo dígitos con indicativo. */
+export const WHATSAPP_NUMBER = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '573025931994').replace(/\D/g, '')
+export const WHATSAPP_DISPLAY = `+${WHATSAPP_NUMBER.slice(0, 2)} ${WHATSAPP_NUMBER.slice(2, 5)} ${WHATSAPP_NUMBER.slice(5, 8)} ${WHATSAPP_NUMBER.slice(8)}`
 export const whatsappLink = (text?: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}${text ? `?text=${encodeURIComponent(text)}` : ''}`
 

@@ -2,7 +2,7 @@
 Requires at least: 6.5
 Requires PHP: 8.1
 Requires Plugins: woocommerce, wp-graphql
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 
 Núcleo headless de ZELTRON Express (admin.zeltronexpress.com).
 
@@ -42,6 +42,9 @@ Opcional (más seguro): define el secreto en wp-config.php
 * Proveedor y costo: pestaña General, bloque "Zeltron · Proveedor y margen".
 
 == Changelog ==
+
+= 1.4.0 =
+* Nuevo: memoria del bot de WhatsApp (zeltronBotState / zeltronSetBotState) para el webhook de la tienda.
 
 = 1.3.0 =
 * Nuevo: los favoritos del cliente se guardan en su cuenta (zeltronSetFavorites) y se ven en cualquier dispositivo.
