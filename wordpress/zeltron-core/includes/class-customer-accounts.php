@@ -195,7 +195,7 @@ final class Customer_Accounts {
 	}
 
 	/** @return array<string,int> hash => expira */
-	private static function sessions( int $user_id ): array {
+	public static function sessions( int $user_id ): array {
 		$sessions = get_user_meta( $user_id, self::SESSIONS_META, true );
 		$sessions = is_array( $sessions ) ? $sessions : array();
 		$now      = time();
@@ -224,90 +224,20 @@ final class Customer_Accounts {
 		return isset( $sessions[ $hash ] ) ? $user_id : 0;
 	}
 
-	private static function hash( string $token ): string {
+	/** Cierra todas las sesiones menos la indicada (por ejemplo, tras cambiar la contraseña). */
+	public static function keep_only_session( int $user_id, string $token ): void {
+		$sessions = self::sessions( $user_id );
+		$hash     = self::hash( $token );
+		update_user_meta( $user_id, self::SESSIONS_META, isset( $sessions[ $hash ] ) ? array( $hash => $sessions[ $hash ] ) : array() );
+	}
+
+	public static function hash( string $token ): string {
 		return hash_hmac( 'sha256', $token, wp_salt( 'auth' ) );
 	}
 
-	/* ---------------------------------------------------------------------
-	 * Perfil
-	 * ------------------------------------------------------------------- */
-
+	/** Perfil completo (ver Customer_Profile). */
 	public static function profile( int $user_id ): array {
-		$user     = get_userdata( $user_id );
-		$customer = new \WC_Customer( $user_id );
-		$name     = trim( $customer->get_first_name() . ' ' . $customer->get_last_name() );
-		if ( '' === $name ) {
-			$name = $user ? $user->display_name : '';
-		}
-
-		$addresses = array();
-		if ( $customer->get_billing_address_1() ) {
-			$addresses[] = array(
-				'id'         => 'billing',
-				'label'      => 'Dirección principal',
-				'recipient'  => trim( $customer->get_billing_first_name() . ' ' . $customer->get_billing_last_name() ) ?: $name,
-				'street'     => trim( $customer->get_billing_address_1() . ' ' . $customer->get_billing_address_2() ),
-				'city'       => trim( $customer->get_billing_city() . ', ' . self::state_name( $customer->get_billing_state() ), ', ' ),
-				'phone'      => $customer->get_billing_phone(),
-				'notes'      => '',
-				'isPrimary'  => true,
-			);
-		}
-
-		$created = $user ? strtotime( $user->user_registered ) : time();
-		return array(
-			'id'          => (string) $user_id,
-			'name'        => $name,
-			'email'       => $user ? $user->user_email : '',
-			'phone'       => $customer->get_billing_phone(),
-			'memberSince' => self::spanish_date( $created, true ),
-			'addresses'   => $addresses,
-			'orders'      => self::orders( $user_id, $user ? $user->user_email : '' ),
-		);
-	}
-
-	/** Pedidos de la cuenta y los que hizo como invitado con el mismo correo. */
-	private static function orders( int $user_id, string $email ): array {
-		$customers = array_filter( array( $user_id, $email ) );
-		$orders    = wc_get_orders(
-			array(
-				'customer' => $customers,
-				'limit'    => 50,
-				'orderby'  => 'date',
-				'order'    => 'DESC',
-				'type'     => 'shop_order',
-			)
-		);
-		$labels = wc_get_order_statuses();
-		$out    = array();
-		foreach ( $orders as $order ) {
-			if ( ! $order instanceof \WC_Order ) {
-				continue;
-			}
-			$date  = $order->get_date_created();
-			$out[] = array(
-				'number'    => (string) $order->get_order_number(),
-				'date'      => $date ? self::spanish_date( $date->getTimestamp(), false ) : '',
-				'itemCount' => (int) $order->get_item_count(),
-				'total'     => (int) round( (float) $order->get_total() ),
-				'status'    => $labels[ 'wc-' . $order->get_status() ] ?? $order->get_status(),
-			);
-		}
-		return $out;
-	}
-
-	/** Fechas en español sin depender del idioma configurado en WordPress. */
-	private static function spanish_date( int $timestamp, bool $month_and_year ): string {
-		$months = array( 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre' );
-		$month  = $months[ (int) wp_date( 'n', $timestamp ) - 1 ];
-		return $month_and_year
-			? $month . ' de ' . wp_date( 'Y', $timestamp )
-			: wp_date( 'j', $timestamp ) . ' ' . substr( $month, 0, 3 ) . ' ' . wp_date( 'Y', $timestamp );
-	}
-
-	private static function state_name( string $code ): string {
-		$states = WC()->countries ? WC()->countries->get_states( 'CO' ) : array();
-		return is_array( $states ) && isset( $states[ $code ] ) ? $states[ $code ] : $code;
+		return Customer_Profile::data( $user_id );
 	}
 
 	/* ---------------------------------------------------------------------
@@ -346,7 +276,7 @@ final class Customer_Accounts {
 	 * Utilidades
 	 * ------------------------------------------------------------------- */
 
-	private static function assert_password( string $password ): void {
+	public static function assert_password( string $password ): void {
 		if ( strlen( $password ) < self::MIN_PASSWORD ) {
 			throw new UserError( 'La contraseña debe tener al menos 8 caracteres.' );
 		}
@@ -355,11 +285,11 @@ final class Customer_Accounts {
 		}
 	}
 
-	private static function clean_text( string $value, int $max ): string {
+	public static function clean_text( string $value, int $max ): string {
 		return mb_substr( trim( preg_replace( '/\s+/', ' ', sanitize_text_field( $value ) ) ), 0, $max );
 	}
 
-	private static function require_secret(): void {
+	public static function require_secret(): void {
 		if ( ! Settings::request_is_authorized() ) {
 			throw new UserError( 'No autorizado.' );
 		}
@@ -370,48 +300,6 @@ final class Customer_Accounts {
 	 * ------------------------------------------------------------------- */
 
 	public static function register(): void {
-		register_graphql_object_type(
-			'ZeltronAddress',
-			array(
-				'fields' => array(
-					'id'        => array( 'type' => array( 'non_null' => 'String' ) ),
-					'label'     => array( 'type' => array( 'non_null' => 'String' ) ),
-					'recipient' => array( 'type' => array( 'non_null' => 'String' ) ),
-					'street'    => array( 'type' => array( 'non_null' => 'String' ) ),
-					'city'      => array( 'type' => array( 'non_null' => 'String' ) ),
-					'phone'     => array( 'type' => array( 'non_null' => 'String' ) ),
-					'notes'     => array( 'type' => array( 'non_null' => 'String' ) ),
-					'isPrimary' => array( 'type' => array( 'non_null' => 'Boolean' ) ),
-				),
-			)
-		);
-		register_graphql_object_type(
-			'ZeltronCustomerOrder',
-			array(
-				'fields' => array(
-					'number'    => array( 'type' => array( 'non_null' => 'String' ) ),
-					'date'      => array( 'type' => array( 'non_null' => 'String' ) ),
-					'itemCount' => array( 'type' => array( 'non_null' => 'Int' ) ),
-					'total'     => array( 'type' => array( 'non_null' => 'Int' ) ),
-					'status'    => array( 'type' => array( 'non_null' => 'String' ) ),
-				),
-			)
-		);
-		register_graphql_object_type(
-			'ZeltronCustomer',
-			array(
-				'fields' => array(
-					'id'          => array( 'type' => array( 'non_null' => 'ID' ) ),
-					'name'        => array( 'type' => array( 'non_null' => 'String' ) ),
-					'email'       => array( 'type' => array( 'non_null' => 'String' ) ),
-					'phone'       => array( 'type' => array( 'non_null' => 'String' ) ),
-					'memberSince' => array( 'type' => array( 'non_null' => 'String' ) ),
-					'addresses'   => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'ZeltronAddress' ) ) ) ),
-					'orders'      => array( 'type' => array( 'non_null' => array( 'list_of' => array( 'non_null' => 'ZeltronCustomerOrder' ) ) ) ),
-				),
-			)
-		);
-
 		$session_output = array(
 			'token'     => array( 'type' => 'String' ),
 			'expiresIn' => array( 'type' => 'Int', 'description' => 'Segundos de vida de la sesión.' ),

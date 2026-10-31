@@ -39,7 +39,7 @@ async function saveSession({ token, expiresIn }: SessionPayload, remember: boole
 
 function safeRedirect(value: FormDataEntryValue | null) {
   const path = typeof value === 'string' ? value : ''
-  return path.startsWith('/') && !path.startsWith('//') ? path : '/perfil'
+  return path.startsWith('/') && !path.startsWith('//') && !path.startsWith('/\\') ? path : '/'
 }
 
 const email = z.string().trim().toLowerCase().email('Escribe un correo electrónico válido.')

@@ -5,7 +5,7 @@ import { Header } from '@/components/storefront'
 /** Header con la sesión del cliente (lee la cookie: se renderiza en cada petición, dentro de <Suspense>). */
 export async function SiteHeader() {
   const [categories, customer] = await Promise.all([getCategories(), getCurrentCustomer()])
-  const account = customer ? { name: customer.name, email: customer.email } : null
+  const account = customer ? { name: customer.name, email: customer.email, avatarUrl: customer.avatarUrl } : null
   return <Header categories={categories} account={account} />
 }
 

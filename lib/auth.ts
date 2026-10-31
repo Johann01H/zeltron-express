@@ -1,6 +1,7 @@
 import 'server-only'
 import { cache } from 'react'
 import { cookies } from 'next/headers'
+import { unstable_rethrow } from 'next/navigation'
 import { isWordPressConfigured, wpQuery } from './wordpress'
 
 /**
@@ -13,11 +14,24 @@ export type CustomerAddress = {
   id: string
   label: string
   recipient: string
-  street: string
-  city: string
   phone: string
+  department: string
+  city: string
+  neighborhood: string
+  street: string
   notes: string
   isPrimary: boolean
+}
+
+export type OrderStep = 'recibido' | 'confirmacion' | 'despachado' | 'en-camino' | 'entregado' | 'cancelado'
+
+export type CustomerOrderItem = {
+  name: string
+  variant: string
+  quantity: number
+  total: number
+  image: string
+  slug: string
 }
 
 export type CustomerOrderSummary = {
@@ -25,15 +39,27 @@ export type CustomerOrderSummary = {
   date: string
   itemCount: number
   total: number
+  shipping: number
   status: string
+  step: OrderStep
+  address: string
+  city: string
+  carrier: string
+  trackingNumber: string
+  items: CustomerOrderItem[]
 }
 
 export type Customer = {
   id: string
+  firstName: string
+  lastName: string
   name: string
   email: string
   phone: string
+  avatarUrl: string
   memberSince: string
+  orderCount: number
+  totalSpent: number
   addresses: CustomerAddress[]
   orders: CustomerOrderSummary[]
 }
@@ -45,12 +71,20 @@ export const ACCOUNTS_ENABLED = isWordPressConfigured()
 
 export const CUSTOMER_FIELDS = /* GraphQL */ `
   id
+  firstName
+  lastName
   name
   email
   phone
+  avatarUrl
   memberSince
-  addresses { id label recipient street city phone notes isPrimary }
-  orders { number date itemCount total status }
+  orderCount
+  totalSpent
+  addresses { id label recipient phone department city neighborhood street notes isPrimary }
+  orders {
+    number date itemCount total shipping status step address city carrier trackingNumber
+    items { name variant quantity total image slug }
+  }
 `
 
 export async function getSessionToken(): Promise<string | null> {
@@ -70,6 +104,8 @@ export const getCurrentCustomer = cache(async (): Promise<Customer | null> => {
     )
     return data.zeltronCustomer
   } catch (error) {
+    // Errores internos de Next.js (prerender, redirecciones) deben seguir su curso.
+    unstable_rethrow(error)
     console.error('[auth] No se pudo cargar la sesión:', error)
     return null
   }

@@ -1,30 +1,31 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
-import { ProfileDashboard, type ProfileTab } from '@/components/profile-dashboard'
+import { ProfileDashboard } from '@/components/profile-dashboard'
+import { PROFILE_TABS, type ProfileTab } from '@/lib/profile-tabs'
 import { getCurrentCustomer } from '@/lib/auth'
+import { getProducts } from '@/lib/catalog'
 import { PanelSkeleton } from '@/components/skeletons'
 
 export const metadata: Metadata = {
-  title: 'Mi perfil | ZELTRON Express',
-  description: 'Consulta tus pedidos y direcciones en ZELTRON Express.',
+  title: 'Mi cuenta | ZELTRON Express',
+  description: 'Tus pedidos, direcciones, favoritos y datos en ZELTRON Express.',
   robots: { index: false },
 }
 
-const tabs: ProfileTab[] = ['resumen', 'direcciones', 'pedidos']
-
 async function Profile({ searchParams }: { searchParams: Promise<{ tab?: string | string[] }> }) {
-  const [customer, params] = await Promise.all([getCurrentCustomer(), searchParams])
-  // Sin sesión no hay perfil: el acceso se hace desde el menú de cuenta del header.
-  if (!customer) redirect('/iniciar-sesion')
-  const tab = typeof params.tab === 'string' && tabs.includes(params.tab as ProfileTab) ? (params.tab as ProfileTab) : 'resumen'
-  return <ProfileDashboard customer={customer} initialTab={tab} />
+  const [customer, params, products] = await Promise.all([getCurrentCustomer(), searchParams, getProducts()])
+  // Sin sesión no hay perfil: se vuelve aquí después de iniciar sesión.
+  if (!customer) redirect('/iniciar-sesion?next=/perfil')
+  const requested = typeof params.tab === 'string' ? params.tab : ''
+  const tab: ProfileTab = (PROFILE_TABS as readonly string[]).includes(requested) ? (requested as ProfileTab) : 'pedidos'
+  return <ProfileDashboard key={tab} customer={customer} initialTab={tab} products={products} />
 }
 
 export default function ProfilePage({ searchParams }: PageProps<'/perfil'>) {
   return (
     <main>
-      <Suspense fallback={<PanelSkeleton label="Cargando tu perfil" />}>
+      <Suspense fallback={<PanelSkeleton label="Cargando tu cuenta" />}>
         <Profile searchParams={searchParams as Promise<{ tab?: string | string[] }>} />
       </Suspense>
     </main>

@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import { useEffect, useId, useRef, useState } from 'react'
-import { ChevronDown, Heart, LogIn, LogOut, PackageCheck, UserPlus, UserRound } from 'lucide-react'
+import { ChevronDown, Heart, LogIn, LogOut, MapPin, PackageCheck, Settings, UserPlus, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export type HeaderAccount = { name: string; email: string } | null
+export type HeaderAccount = { name: string; email: string; avatarUrl?: string } | null
 
 const item = 'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-[#0E1A3A] outline-none transition hover:bg-[#F4F6FB] focus-visible:bg-[#F4F6FB]'
 
@@ -36,7 +36,11 @@ export function AccountMenu({ account }: { account: HeaderAccount }) {
         onClick={() => setOpen((v) => !v)}
         className={cn('flex items-center gap-1.5 rounded-lg p-1.5 text-white transition hover:text-[#FFC92E]', open && 'text-[#FFC92E]')}
       >
-        <UserRound className="size-5" aria-hidden="true" />
+        {account?.avatarUrl ? (
+          <img src={account.avatarUrl} alt="" className="size-7 rounded-full object-cover ring-2 ring-[#FFC92E]" />
+        ) : (
+          <UserRound className="size-5" aria-hidden="true" />
+        )}
         <span className="hidden text-xs font-semibold lg:inline">{account ? `Hola, ${firstName}` : 'Mi cuenta'}</span>
         <ChevronDown aria-hidden="true" className={cn('hidden size-3.5 transition lg:block', open && 'rotate-180')} />
         <span className="sr-only">Menú de cuenta</span>
@@ -52,16 +56,21 @@ export function AccountMenu({ account }: { account: HeaderAccount }) {
           {account ? (
             <>
               <div className="flex items-center gap-3 px-3 pb-3 pt-2">
-                <span className="grid size-10 place-items-center rounded-full bg-[#0E1A3A] text-sm font-bold text-[#FFC92E]">{firstName?.[0]?.toUpperCase()}</span>
+                {account.avatarUrl ? (
+                  <img src={account.avatarUrl} alt="" className="size-10 rounded-full object-cover" />
+                ) : (
+                  <span className="grid size-10 place-items-center rounded-full bg-[#0E1A3A] text-sm font-bold text-[#FFC92E]">{firstName?.[0]?.toUpperCase()}</span>
+                )}
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold">{account.name}</p>
                   <p className="truncate text-xs text-[#5B6478]">{account.email}</p>
                 </div>
               </div>
               <div className="my-1 h-px bg-[#E6EAF2]" />
-              <Link role="menuitem" href="/perfil" onClick={close} className={item}><UserRound className="size-4 text-[#2F5BFF]" />Mi perfil</Link>
-              <Link role="menuitem" href="/perfil?tab=pedidos" onClick={close} className={item}><PackageCheck className="size-4 text-[#2F5BFF]" />Mis pedidos</Link>
-              <Link role="menuitem" href="/favoritos" onClick={close} className={item}><Heart className="size-4 text-[#2F5BFF]" />Favoritos</Link>
+              <Link role="menuitem" href="/perfil" onClick={close} className={item}><PackageCheck className="size-4 text-[#2F5BFF]" />Mis pedidos</Link>
+              <Link role="menuitem" href="/perfil?tab=direcciones" onClick={close} className={item}><MapPin className="size-4 text-[#2F5BFF]" />Direcciones</Link>
+              <Link role="menuitem" href="/perfil?tab=favoritos" onClick={close} className={item}><Heart className="size-4 text-[#2F5BFF]" />Favoritos</Link>
+              <Link role="menuitem" href="/perfil?tab=configuracion" onClick={close} className={item}><Settings className="size-4 text-[#2F5BFF]" />Configuración</Link>
               <div className="my-1 h-px bg-[#E6EAF2]" />
               <form action="/api/cuenta/salir" method="post">
                 <button role="menuitem" type="submit" className={cn(item, 'w-full text-[#B42318] hover:bg-[#FFF1F0]')}><LogOut className="size-4" />Cerrar sesión</button>

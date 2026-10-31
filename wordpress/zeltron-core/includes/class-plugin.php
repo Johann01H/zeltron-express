@@ -23,6 +23,7 @@ final class Plugin {
 		GraphQL::init();
 		Image_Linker::init();
 		Customer_Accounts::init();
+		Customer_Profile::init();
 	}
 
 	public static function missing_dependencies_notice(): void {

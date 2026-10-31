@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Suspense, useState, useTransition, type FormEvent } from 'react'
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, CreditCard, Eye, EyeOff, KeyRound, LockKeyhole, MailCheck, MessageCircle, Truck } from 'lucide-react'
 import { whatsappLink, COMPANY_NAME } from '@/lib/config'
@@ -180,7 +180,6 @@ function Notice({ result }: { result: AccountActionResult | null }) {
 }
 
 function AuthForm({ isSignUp }: { isSignUp: boolean }) {
-  const router = useRouter()
   const [visible, setVisible] = useState(false)
   const [password, setPassword] = useState('')
   const [notice, setNotice] = useState<AccountActionResult | null>(null)
@@ -190,13 +189,15 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
+    // Al terminar vuelve a la tienda, o a la página protegida que pidió iniciar sesión (?next=).
+    formData.set('redirectTo', new URLSearchParams(window.location.search).get('next') ?? '/')
     setNotice(null)
     startTransition(async () => {
       const result = await (isSignUp ? signUp(formData) : signIn(formData))
       setNotice(result)
       if (result.ok) {
-        router.replace(result.redirectTo ?? '/perfil')
-        router.refresh()
+        // Navegación completa: la tienda se vuelve a pintar ya con la sesión (header incluido).
+        window.location.assign(result.redirectTo ?? '/')
       }
     })
   }
@@ -211,7 +212,6 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
-        <input type="hidden" name="redirectTo" value="/perfil" />
         {isSignUp && (
           <div className="grid gap-4 sm:grid-cols-2">
             <TextField id="name" name="name" label="Nombre completo" autoComplete="name" placeholder="María Fernanda" required />
