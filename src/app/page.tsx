@@ -8,6 +8,8 @@ import { CategoryGrid, HowItWorks, TrustBar } from "@/components/site-sections";
 import { OfferSection, OfferCountdown } from "@/components/offer-countdown";
 import { ShortsShelf } from "@/components/shorts";
 import { getShorts } from "@/lib/shorts";
+import { getBannerSections } from "@/lib/banners";
+import { PromoBannerSection } from "@/components/promo-banners";
 
 export const metadata = {
   title: "Inicio | ZELTRON Express",
@@ -15,7 +17,7 @@ export const metadata = {
 };
 
 export default async function Page() {
-  const [products, categories, shorts] = await Promise.all([getProducts(), getCategories(), getShorts()]);
+  const [products, categories, shorts, promos] = await Promise.all([getProducts(), getCategories(), getShorts(), getBannerSections()]);
   const available = products.filter((p) => p.stock > 0);
   const best = (available.some((p) => p.isBestSeller) ? available.filter((p) => p.isBestSeller) : available).slice(0, 4);
   const featured = best[0] ?? products[0];
@@ -79,6 +81,7 @@ export default async function Page() {
         <div className="home-canvas">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <TrustBar />
+            {promos.map((section, i) => <PromoBannerSection key={section.id} section={section} index={i} />)}
             <CategoryGrid categories={categories} products={products} />
 
             {onSale > 0 && (

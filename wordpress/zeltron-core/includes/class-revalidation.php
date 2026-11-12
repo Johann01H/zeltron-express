@@ -30,10 +30,13 @@ final class Revalidation {
 		add_action( 'transition_post_status', array( self::class, 'on_status_change' ), 10, 3 );
 		// Editar un short publicado también actualiza la tienda.
 		add_action( 'save_post_' . Shorts::POST_TYPE, array( self::class, 'schedule' ), 20 );
+		add_action( 'save_post_' . Banners::POST_TYPE, array( self::class, 'schedule' ), 20 );
+		add_action( 'save_post_' . Financiers::POST_TYPE, array( self::class, 'schedule' ), 20 );
+		add_action( 'delete_' . Banners::TAXONOMY, array( self::class, 'schedule' ) );
 	}
 
 	public static function on_status_change( $new, $old, $post ): void {
-		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'product', Shorts::POST_TYPE ), true ) && $new !== $old ) {
+		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'product', Shorts::POST_TYPE, Banners::POST_TYPE, Financiers::POST_TYPE ), true ) && $new !== $old ) {
 			self::schedule();
 		}
 	}

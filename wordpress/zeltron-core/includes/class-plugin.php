@@ -26,6 +26,8 @@ final class Plugin {
 		Customer_Profile::init();
 		Bot_State::init();
 		Shorts::init();
+		Banners::init();
+		Financiers::init();
 	}
 
 	public static function missing_dependencies_notice(): void {

@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
+import { PaymentMethodsStrip } from '@/components/financing'
 import { ArrowRight, BatteryCharging, Bike, CreditCard, Gamepad2, Headphones, Home, Laptop, MessageCircle, ShieldCheck, Smartphone, Truck, Tv, Watch } from 'lucide-react'
 import { COMPANY_NAME, FACEBOOK_URL, FREE_SHIPPING_FROM, INSTAGRAM_URL, whatsappLink } from '@/lib/config'
 import { formatCOP } from '@/lib/format'
@@ -126,6 +128,7 @@ export function Footer() {
           <div className="mt-4 flex flex-col gap-3 text-sm text-white/70">
             <Link href="/rastrear">Rastrear pedido</Link>
             <Link href="/shorts">Videos de productos</Link>
+            <Link href="/credito">Compra a crédito</Link>
             <Link href="/preguntas-frecuentes">Preguntas frecuentes</Link>
             <Link href="/envios">Envíos</Link>
             <Link href="/garantias-y-devoluciones">Garantías y devoluciones</Link>
@@ -148,6 +151,9 @@ export function Footer() {
           </div>
         </div>
       </div>
+      <Suspense fallback={null}>
+        <PaymentMethodsStrip />
+      </Suspense>
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/60">© {COMPANY_NAME}</div>
     </footer>
   )

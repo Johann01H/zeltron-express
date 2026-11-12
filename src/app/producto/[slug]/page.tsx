@@ -12,6 +12,8 @@ import { ProductGallery } from '@/components/product-gallery'
 import { DeliveryEstimate } from '@/components/delivery-estimate'
 import { ShortsShelf } from '@/components/shorts'
 import { getShortsForProduct } from '@/lib/shorts'
+import { getFinanciers } from '@/lib/financiers'
+import { ProductFinancing } from '@/components/financing'
 
 // Con Cache Components debe devolver al menos una ruta. Si el catálogo está vacío
 // usamos una ruta de reserva que responde 404; los productos nuevos se generan al primer visitante.
@@ -33,7 +35,7 @@ export default async function ProductPage({ params }: PageProps<'/producto/[slug
   const p = await getProduct((await params).slug)
   if (!p) notFound()
 
-  const [products, shorts] = await Promise.all([getProducts(), getShortsForProduct(p.slug)])
+  const [products, shorts, financiers] = await Promise.all([getProducts(), getShortsForProduct(p.slug), getFinanciers()])
   const related = [
     ...products.filter((x) => x.slug !== p.slug && x.category === p.category),
     ...products.filter((x) => x.slug !== p.slug && x.category !== p.category),
@@ -94,6 +96,7 @@ export default async function ProductPage({ params }: PageProps<'/producto/[slug
               </dl>
             )}
             <ProductActions product={p} />
+            <ProductFinancing product={p} financiers={financiers} />
             <div className="mt-6">
               <DeliveryEstimate />
             </div>
