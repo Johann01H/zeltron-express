@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { WhatsApp } from '@/components/storefront'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { FACEBOOK_URL, INSTAGRAM_URL, WHATSAPP_DISPLAY, whatsappLink } from '@/lib/config'
@@ -38,7 +37,6 @@ export default function ContactPage() {
           </form>
         </div>
       </main>
-      <WhatsApp />
     </>
   )
 }

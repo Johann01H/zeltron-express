@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Heart } from 'lucide-react'
 import { FavoritesContent } from '@/components/favorites-content'
-import { WhatsApp } from '@/components/storefront'
 import { getProducts } from '@/lib/catalog'
 
 export const metadata: Metadata = {
@@ -41,7 +40,6 @@ export default async function FavoritesPage() {
           <FavoritesContent products={products} />
         </div>
       </main>
-      <WhatsApp />
     </>
   )
 }

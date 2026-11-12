@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Heart, Menu, MessageCircle, Minus, Plus, ShoppingCart, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -84,21 +85,36 @@ export function Header({ categories, account, searchItems }: { categories: Categ
   )
 }
 
+/** Botón flotante de WhatsApp. En la página de producto el mensaje ya trae el producto y el precio. */
 export function WhatsApp({ product }: { product?: Product }) {
   const message = product
     ? `Hola, estoy interesado en ${product.name} por ${formatCOP(product.price)}.`
-    : 'Hola, quiero conocer las ofertas de ZELTRON Express.'
+    : 'Hola, quiero más información sobre los productos de ZELTRON Express.'
   return (
     <a
-      aria-label="Escribir por WhatsApp"
+      aria-label="Escríbenos por WhatsApp"
       href={whatsappLink(message)}
       target="_blank"
       rel="noreferrer"
-      className={`whatsapp-float ${product ? 'product-whatsapp' : ''} grid size-14 place-items-center rounded-full bg-[#16A34A] text-white shadow-xl`}
+      className={`whatsapp-float ${product ? 'product-whatsapp' : ''} group flex items-center gap-2 rounded-full bg-[#16A34A] p-1.5 text-white shadow-[0_12px_30px_rgba(22,163,74,.38)] transition hover:bg-[#12843d] md:pr-4`}
     >
-      <MessageCircle />
+      <span className="relative grid size-11 place-items-center rounded-full bg-white/15">
+        <span aria-hidden="true" className="absolute inset-0 animate-ping rounded-full bg-white/25 [animation-duration:2.4s]" />
+        <MessageCircle className="relative size-6" />
+      </span>
+      <span className="hidden text-sm font-bold leading-tight md:block">
+        ¿Te ayudamos?
+        <span className="block text-[11px] font-semibold text-white/80">Escríbenos por WhatsApp</span>
+      </span>
     </a>
   )
+}
+
+/** Botón de WhatsApp en todas las páginas (la de producto pone el suyo con el producto). */
+export function GlobalWhatsApp() {
+  const pathname = usePathname()
+  if (pathname.startsWith('/producto/')) return null
+  return <WhatsApp />
 }
 
 export function ProductCard({ product }: { product: Product }) {

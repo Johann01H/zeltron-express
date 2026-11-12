@@ -125,6 +125,7 @@ export function Footer() {
           <h3>Ayuda y servicio</h3>
           <div className="mt-4 flex flex-col gap-3 text-sm text-white/70">
             <Link href="/rastrear">Rastrear pedido</Link>
+            <Link href="/shorts">Videos de productos</Link>
             <Link href="/preguntas-frecuentes">Preguntas frecuentes</Link>
             <Link href="/envios">Envíos</Link>
             <Link href="/garantias-y-devoluciones">Garantías y devoluciones</Link>

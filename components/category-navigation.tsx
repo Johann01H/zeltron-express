@@ -47,6 +47,9 @@ export function CategoryNavigation({ variant, categories, onNavigate }: Category
         <Link className="mobile-category-offers" href="/productos?oferta=true" onClick={onNavigate}>
           Ofertas de la semana
         </Link>
+        <Link className="mobile-category-all" href="/shorts" onClick={onNavigate}>
+          Videos de productos
+        </Link>
       </nav>
     )
   }
@@ -114,6 +117,9 @@ function DesktopNavigation({ categories }: { categories: Category[] }) {
       ))}
       <Link className="category-nav-offers" href="/productos?oferta=true" onClick={close}>
         Ofertas
+      </Link>
+      <Link href="/shorts" onClick={close}>
+        Videos
       </Link>
     </nav>
   )

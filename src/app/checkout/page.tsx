@@ -7,7 +7,6 @@ import { ArrowLeft, ArrowRight, Check, CreditCard, LockKeyhole, PackageCheck, Sh
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/ui/field'
 import { Separator } from '@/components/ui/separator'
-import { WhatsApp } from '@/components/storefront'
 import { FREE_SHIPPING_FROM, shippingFor } from '@/lib/config'
 import { formatCOP } from '@/lib/format'
 import { useHydrated } from '@/lib/use-hydrated'
@@ -193,7 +192,6 @@ export default function CheckoutPage() {
           )}
         </div>
       </main>
-      <WhatsApp />
     </>
   )
 }

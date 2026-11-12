@@ -3,9 +3,11 @@ import { ArrowRight, MessageCircle, Zap } from "lucide-react";
 import { getCategories, getProducts } from "@/lib/catalog";
 import { whatsappLink } from "@/lib/config";
 import { formatCOP, isOnSale } from "@/lib/format";
-import { ProductCard, WhatsApp } from "@/components/storefront";
+import { ProductCard } from "@/components/storefront";
 import { CategoryGrid, HowItWorks, TrustBar } from "@/components/site-sections";
 import { OfferSection, OfferCountdown } from "@/components/offer-countdown";
+import { ShortsShelf } from "@/components/shorts";
+import { getShorts } from "@/lib/shorts";
 
 export const metadata = {
   title: "Inicio | ZELTRON Express",
@@ -13,7 +15,7 @@ export const metadata = {
 };
 
 export default async function Page() {
-  const [products, categories] = await Promise.all([getProducts(), getCategories()]);
+  const [products, categories, shorts] = await Promise.all([getProducts(), getCategories(), getShorts()]);
   const available = products.filter((p) => p.stock > 0);
   const best = (available.some((p) => p.isBestSeller) ? available.filter((p) => p.isBestSeller) : available).slice(0, 4);
   const featured = best[0] ?? products[0];
@@ -97,6 +99,19 @@ export default async function Page() {
               </OfferSection>
             )}
 
+            {shorts.length > 0 && (
+              <section className="py-16" aria-labelledby="shorts-title">
+                <div className="mb-8 flex items-end justify-between gap-4">
+                  <div>
+                    <h2 id="shorts-title">Míralo en acción</h2>
+                    <p className="mt-2 text-sm text-[#5B6478]">Videos cortos de los productos funcionando de verdad.</p>
+                  </div>
+                  <Link href="/shorts" className="link-arrow">Ver todos <ArrowRight aria-hidden="true" className="size-4" /></Link>
+                </div>
+                <ShortsShelf shorts={shorts.slice(0, 12)} />
+              </section>
+            )}
+
             <HowItWorks />
 
             <section className="py-16" aria-labelledby="best-title">
@@ -126,7 +141,6 @@ export default async function Page() {
           </div>
         </div>
       </main>
-      <WhatsApp />
     </>
   );
 }

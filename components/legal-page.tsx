@@ -1,4 +1,3 @@
-import { WhatsApp } from '@/components/storefront'
 
 export function LegalPage({ eyebrow, title, sections }: { eyebrow: string; title: string; sections: [string, string][] }) {
   return (
@@ -15,7 +14,6 @@ export function LegalPage({ eyebrow, title, sections }: { eyebrow: string; title
           ))}
         </div>
       </main>
-      <WhatsApp />
     </>
   )
 }

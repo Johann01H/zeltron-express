@@ -28,10 +28,12 @@ final class Revalidation {
 			add_action( $hook, array( self::class, 'schedule' ) );
 		}
 		add_action( 'transition_post_status', array( self::class, 'on_status_change' ), 10, 3 );
+		// Editar un short publicado también actualiza la tienda.
+		add_action( 'save_post_' . Shorts::POST_TYPE, array( self::class, 'schedule' ), 20 );
 	}
 
 	public static function on_status_change( $new, $old, $post ): void {
-		if ( $post instanceof \WP_Post && 'product' === $post->post_type && $new !== $old ) {
+		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'product', Shorts::POST_TYPE ), true ) && $new !== $old ) {
 			self::schedule();
 		}
 	}

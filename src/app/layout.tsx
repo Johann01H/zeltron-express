@@ -7,6 +7,7 @@ import { SiteHeader, SiteHeaderShell } from "@/components/site-header";
 import { SiteChrome } from "@/components/site-chrome";
 import { RouteProgress } from "@/components/route-progress";
 import { Footer } from "@/components/site-sections";
+import { GlobalWhatsApp } from "@/components/storefront";
 import { SITE_URL, STORE_NAME } from "@/lib/config";
 import { getSiteIconUrl } from "@/lib/site-icon";
 
@@ -71,6 +72,9 @@ export default function RootLayout({
         {children}
         <Suspense fallback={<Footer />}>
           <SiteChrome><Footer /></SiteChrome>
+        </Suspense>
+        <Suspense fallback={null}>
+          <SiteChrome><GlobalWhatsApp /></SiteChrome>
         </Suspense>
         <script
           type="application/ld+json"

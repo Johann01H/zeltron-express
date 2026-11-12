@@ -25,6 +25,7 @@ final class Plugin {
 		Customer_Accounts::init();
 		Customer_Profile::init();
 		Bot_State::init();
+		Shorts::init();
 	}
 
 	public static function missing_dependencies_notice(): void {

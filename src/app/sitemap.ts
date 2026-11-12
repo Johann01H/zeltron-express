@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { getProducts } from '@/lib/catalog'
 import { SITE_URL } from '@/lib/config'
 
-const pages = ['', 'productos', 'preguntas-frecuentes', 'envios', 'garantias-y-devoluciones', 'terminos', 'privacidad', 'contacto', 'rastrear']
+const pages = ['', 'productos', 'preguntas-frecuentes', 'envios', 'garantias-y-devoluciones', 'terminos', 'privacidad', 'contacto', 'rastrear', 'shorts']
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await getProducts()

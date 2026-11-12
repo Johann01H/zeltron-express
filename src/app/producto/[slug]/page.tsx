@@ -10,6 +10,8 @@ import { FavoriteButton } from '@/components/favorite-button'
 import { ProductActions } from './product-actions'
 import { ProductGallery } from '@/components/product-gallery'
 import { DeliveryEstimate } from '@/components/delivery-estimate'
+import { ShortsShelf } from '@/components/shorts'
+import { getShortsForProduct } from '@/lib/shorts'
 
 // Con Cache Components debe devolver al menos una ruta. Si el catálogo está vacío
 // usamos una ruta de reserva que responde 404; los productos nuevos se generan al primer visitante.
@@ -31,7 +33,7 @@ export default async function ProductPage({ params }: PageProps<'/producto/[slug
   const p = await getProduct((await params).slug)
   if (!p) notFound()
 
-  const products = await getProducts()
+  const [products, shorts] = await Promise.all([getProducts(), getShortsForProduct(p.slug)])
   const related = [
     ...products.filter((x) => x.slug !== p.slug && x.category === p.category),
     ...products.filter((x) => x.slug !== p.slug && x.category !== p.category),
@@ -105,6 +107,13 @@ export default async function ProductPage({ params }: PageProps<'/producto/[slug
             </ul>
           </div>
         </div>
+        {shorts.length > 0 && (
+          <section className="mt-16" aria-labelledby="product-shorts">
+            <h2 id="product-shorts">Míralo en video</h2>
+            <p className="mt-2 text-sm text-[#5B6478]">Así funciona {p.name} de verdad.</p>
+            <div className="mt-6"><ShortsShelf shorts={shorts} /></div>
+          </section>
+        )}
         {related.length > 0 && (
           <section className="mt-16">
             <h2>También te puede interesar</h2>

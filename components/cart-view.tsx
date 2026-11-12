@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { Truck } from 'lucide-react'
 import type { Product } from '@/lib/types'
 import { ProductCard } from '@/components/storefront'
-import { CartLine, WhatsApp } from '@/components/storefront'
+import { CartLine } from '@/components/storefront'
 import { FREE_SHIPPING_FROM, shippingFor } from '@/lib/config'
 import { formatCOP } from '@/lib/format'
 import { useHydrated } from '@/lib/use-hydrated'
@@ -68,7 +68,6 @@ export function CartView({ products }: { products: Product[] }) {
           </>
         )}
       </main>
-      <WhatsApp />
     </>
   )
 }

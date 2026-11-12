@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import { WhatsApp } from '@/components/storefront'
 import { ProductCatalog } from '@/components/product-catalog'
 import { getCategories, getProducts } from '@/lib/catalog'
 import { CatalogSkeleton } from '@/components/skeletons'
@@ -50,7 +49,6 @@ export default function ProductsPage({ searchParams }: PageProps<'/productos'>) 
           <Catalog searchParams={searchParams as Promise<ProductsSearchParams>} />
         </Suspense>
       </main>
-      <WhatsApp />
     </>
   )
 }

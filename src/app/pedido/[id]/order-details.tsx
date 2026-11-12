@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
-import { WhatsApp } from '@/components/storefront'
 import { OrderTimeline } from '@/components/order-timeline'
 import { PanelSkeleton } from '@/components/skeletons'
 import { whatsappLink } from '@/lib/config'
@@ -80,7 +79,6 @@ export function OrderDetails() {
           </section>
         </div>
       </main>
-      <WhatsApp />
     </>
   )
 }
