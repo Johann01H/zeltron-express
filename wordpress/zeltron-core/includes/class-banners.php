@@ -152,7 +152,8 @@ final class Banners {
 
 	public static function banner_data( \WP_Post $post ): ?array {
 		$image_id = (int) get_post_thumbnail_id( $post );
-		$image    = $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
+		$src      = $image_id ? wp_get_attachment_image_src( $image_id, 'full' ) : false;
+		$image    = $src ? (string) $src[0] : '';
 		if ( ! $image ) {
 			return null;
 		}
@@ -160,7 +161,8 @@ final class Banners {
 		if ( $until && strtotime( $until . ' 23:59:59 ' . wp_timezone_string() ) < time() ) {
 			return null; // Campaña vencida.
 		}
-		$mobile_id = (int) get_post_meta( $post->ID, '_zx_banner_mobile_id', true );
+		$mobile_id  = (int) get_post_meta( $post->ID, '_zx_banner_mobile_id', true );
+		$mobile_src = $mobile_id ? wp_get_attachment_image_src( $mobile_id, 'full' ) : false;
 		$size      = (string) get_post_meta( $post->ID, '_zx_banner_size', true );
 		$link      = (string) get_post_meta( $post->ID, '_zx_banner_link', true );
 
@@ -185,7 +187,11 @@ final class Banners {
 			'title'          => $alt ?: html_entity_decode( get_the_title( $post ), ENT_QUOTES, 'UTF-8' ),
 			'size'           => isset( self::SIZES[ $size ] ) ? $size : 'small',
 			'imageUrl'       => $image,
-			'mobileImageUrl' => $mobile_id ? ( wp_get_attachment_image_url( $mobile_id, 'full' ) ?: null ) : null,
+			'imageWidth'     => (int) $src[1] ?: null,
+			'imageHeight'    => (int) $src[2] ?: null,
+			'mobileImageUrl' => $mobile_src ? (string) $mobile_src[0] : null,
+			'mobileWidth'    => $mobile_src ? ( (int) $mobile_src[1] ?: null ) : null,
+			'mobileHeight'   => $mobile_src ? ( (int) $mobile_src[2] ?: null ) : null,
 			'href'           => $href,
 			'productSlug'    => $product_slug,
 		);
@@ -242,7 +248,11 @@ final class Banners {
 					'title'          => array( 'type' => array( 'non_null' => 'String' ) ),
 					'size'           => array( 'type' => array( 'non_null' => 'String' ), 'description' => 'large | tall | small | wide' ),
 					'imageUrl'       => array( 'type' => array( 'non_null' => 'String' ) ),
+					'imageWidth'     => array( 'type' => 'Int' ),
+					'imageHeight'    => array( 'type' => 'Int' ),
 					'mobileImageUrl' => array( 'type' => 'String' ),
+					'mobileWidth'    => array( 'type' => 'Int' ),
+					'mobileHeight'   => array( 'type' => 'Int' ),
 					'href'           => array( 'type' => 'String' ),
 					'productSlug'    => array( 'type' => 'String' ),
 				),
@@ -323,7 +333,7 @@ final class Banners {
 					</label>
 				<?php endforeach; ?>
 			</div>
-			<p class="description">El mosaico clásico es 1 grande + 1 vertical + 2 pequeños. Deja el texto importante lejos de los bordes: en celular la imagen se recorta un poco.</p>
+			<p class="description">La imagen se muestra completa, sin recortes: los banners de una misma fila se igualan en altura y el ancho se ajusta a la proporción de cada imagen. Dos «Pequeño» seguidos se apilan uno encima del otro; «Ancho completo» ocupa su propia fila.</p>
 
 			<h4>2. ¿A dónde lleva al tocarlo?</h4>
 			<div class="zx-links">

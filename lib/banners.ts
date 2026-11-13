@@ -12,7 +12,11 @@ export type Banner = {
   title: string
   size: BannerSize
   imageUrl: string
+  imageWidth: number | null
+  imageHeight: number | null
   mobileImageUrl: string | null
+  mobileWidth: number | null
+  mobileHeight: number | null
   href: string | null
   productSlug: string | null
 }
@@ -38,14 +42,16 @@ async function loadSections(): Promise<WpSection[]> {
   cacheLife('hours')
   if (!isWordPressConfigured()) return []
   try {
-    const data = await wpQuery<{ zeltronBannerSections: WpSection[] }>(/* GraphQL */ `
+    const query = (fields: string) => wpQuery<{ zeltronBannerSections: WpSection[] }>(/* GraphQL */ `
       query BannerSections {
         zeltronBannerSections {
           id title subtitle category subcategory viewAllHref
-          banners { id title size imageUrl mobileImageUrl href productSlug }
+          banners { id title size imageUrl mobileImageUrl href productSlug ${fields} }
         }
       }
     `)
+    // Las medidas de las imágenes llegan desde la versión 1.7.1 del plugin; sin ellas se usan medidas típicas.
+    const data = await query('imageWidth imageHeight mobileWidth mobileHeight').catch(() => query(''))
     return data.zeltronBannerSections
   } catch (error) {
     // Sin la versión 1.6 del plugin (o con WordPress caído) las secciones no aparecen.

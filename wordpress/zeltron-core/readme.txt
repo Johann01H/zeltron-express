@@ -2,7 +2,7 @@
 Requires at least: 6.5
 Requires PHP: 8.1
 Requires Plugins: woocommerce, wp-graphql
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 
 Núcleo headless de ZELTRON Express (admin.zeltronexpress.com).
 
@@ -42,6 +42,9 @@ Opcional (más seguro): define el secreto en wp-config.php
 * Proveedor y costo: pestaña General, bloque "Zeltron · Proveedor y margen".
 
 == Changelog ==
+
+= 1.7.1 =
+* Banners: se envían las medidas de cada imagen para mostrarlas completas, sin recortes.
 
 = 1.7.0 =
 * Nuevo: menú «Financieras» (logo oficial, para buen historial o reportados, enlace de solicitud o asesor por WhatsApp) con botón para crear las 8 del convenio.
