@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, MessageCircle, Zap } from "lucide-react";
 import { getCategories, getProducts } from "@/lib/catalog";
 import { whatsappLink } from "@/lib/config";
-import { formatCOP, isOnSale } from "@/lib/format";
+import { isOnSale } from "@/lib/format";
 import { ProductCard } from "@/components/storefront";
 import { CategoryGrid, HowItWorks, TrustBar } from "@/components/site-sections";
 import { OfferSection, OfferCountdown } from "@/components/offer-countdown";
@@ -10,6 +10,8 @@ import { ShortsShelf } from "@/components/shorts";
 import { getShorts } from "@/lib/shorts";
 import { getBannerSections } from "@/lib/banners";
 import { PromoBannerSection } from "@/components/promo-banners";
+import { HeroSlider } from "@/components/hero-slider";
+import { getHeroSlides } from "@/lib/hero";
 
 export const metadata = {
   title: "Inicio | ZELTRON Express",
@@ -22,60 +24,13 @@ export default async function Page() {
   const best = (available.some((p) => p.isBestSeller) ? available.filter((p) => p.isBestSeller) : available).slice(0, 4);
   const featured = best[0] ?? products[0];
   const onSale = available.filter(isOnSale).length;
+  const heroSlides = await getHeroSlides(products, featured);
 
   return (
     <>
       <main>
         <section className="hero">
-          <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-28 pt-12 lg:grid-cols-[1.1fr_.9fr] lg:px-8 lg:pb-36 lg:pt-20">
-            <div>
-              <p className="hero-pill">
-                <span aria-hidden="true" className="hero-pill-dot" />
-                Pagas cuando recibes tu pedido
-              </p>
-              <h1 className="hero-title">Tecnología que llega a tu puerta.</h1>
-              <p className="mt-6 max-w-lg text-lg leading-relaxed text-white/75">
-                Audífonos, cargadores, relojes y accesorios con precios claros. Pides hoy, lo recibes en 3 a 7 días hábiles y pagas en efectivo al recibir.
-              </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Link href="/productos?oferta=true" className="btn-volt">
-                  <Zap aria-hidden="true" className="size-4" /> Ver ofertas
-                </Link>
-                <Link href="/productos" className="btn-ghost-light">Explorar catálogo</Link>
-              </div>
-            </div>
-
-            {featured && (
-              <Link href={`/producto/${featured.slug}`} className="ship-label group" aria-label={`Ver ${featured.name}`}>
-                <div className="ship-label-head">
-                  <span className="font-extrabold tracking-[-.04em]">ZELTRON <span className="text-[#0E1A3A]/60">Express</span></span>
-                  <span className="ship-label-tag">Contra entrega</span>
-                </div>
-                <div className="ship-label-body">
-                  <div className="ship-label-media">
-                    <img src={featured.images[0]} alt="" className="size-full object-contain transition duration-500 group-hover:scale-105" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[#5B6478]">Destacado de la semana</p>
-                    <h2 className="mt-1 text-xl leading-tight text-[#0E1A3A] sm:text-2xl">{featured.name}</h2>
-                    <p className="mt-3 text-3xl font-extrabold tabular-nums text-[#0E1A3A]">{formatCOP(featured.price)}</p>
-                    {isOnSale(featured) && <del className="text-sm text-[#5B6478]">{formatCOP(featured.compareAtPrice!)}</del>}
-                  </div>
-                </div>
-                <dl className="ship-label-route">
-                  <div><dt>Pides</dt><dd>Hoy</dd></div>
-                  <div><dt>Llega en</dt><dd>3 a 7 días</dd></div>
-                  <div><dt>Pagas</dt><dd>Al recibir</dd></div>
-                </dl>
-                <div className="ship-label-foot">
-                  <span aria-hidden="true" className="ship-barcode" />
-                  <span className="inline-flex items-center gap-1 text-sm font-bold text-[#2F5BFF]">
-                    Ver producto <ArrowRight aria-hidden="true" className="size-4 transition group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </Link>
-            )}
-          </div>
+          <HeroSlider slides={heroSlides} />
         </section>
 
         <div className="home-canvas">

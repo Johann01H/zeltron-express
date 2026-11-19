@@ -2,7 +2,7 @@
 Requires at least: 6.5
 Requires PHP: 8.1
 Requires Plugins: woocommerce, wp-graphql
-Stable tag: 1.7.1
+Stable tag: 1.8.1
 
 Núcleo headless de ZELTRON Express (admin.zeltronexpress.com).
 
@@ -42,6 +42,13 @@ Opcional (más seguro): define el secreto en wp-config.php
 * Proveedor y costo: pestaña General, bloque "Zeltron · Proveedor y margen".
 
 == Changelog ==
+
+= 1.8.1 =
+* Portada: nuevo tipo «Imagen completa» (la imagen ocupa toda la portada, con versión opcional para celular y enlace).
+
+= 1.8.0 =
+* Nuevo: menú «Portada» para armar el slider principal del inicio (etiqueta, título, texto, dos botones y tarjeta con producto, imagen propia o nada; fecha de fin y orden).
+* Nuevo: consulta pública zeltronHeroSlides.
 
 = 1.7.1 =
 * Banners: se envían las medidas de cada imagen para mostrarlas completas, sin recortes.

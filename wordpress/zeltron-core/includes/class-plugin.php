@@ -28,6 +28,7 @@ final class Plugin {
 		Shorts::init();
 		Banners::init();
 		Financiers::init();
+		Hero_Slides::init();
 	}
 
 	public static function missing_dependencies_notice(): void {
